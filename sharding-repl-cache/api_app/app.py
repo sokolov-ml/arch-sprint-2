@@ -190,26 +190,3 @@ async def create_user(collection_name: str, user: UserModel = Body(...)):
     )
     created_user = await collection.find_one({"_id": new_user.inserted_id})
     return created_user
-
-
-@app.get("/debug/cache-status")
-async def check_cache_status():
-    logger.info("Проверка статуса кэширования")
-    
-    redis_status = {
-        "redis_url_configured": REDIS_URL is not None,
-        "redis_url": REDIS_URL,
-        "cache_enabled": False,
-        "redis_connection": "Not tested"
-    }
-    
-    if REDIS_URL:
-        try:
-            redis = aioredis.from_url(REDIS_URL, encoding="utf8", decode_responses=True)
-            await redis.ping()
-            redis_status["redis_connection"] = "Connected"
-            redis_status["cache_enabled"] = FastAPICache.get_enable()
-        except Exception as e:
-            redis_status["redis_connection"] = f"Error: {str(e)}"
-    
-    return redis_status
